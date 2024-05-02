@@ -8,12 +8,15 @@ RED = (255, 0, 0)
 
 # Funksjon for å vise popup-vinduet
 def show_popup(screen):
-    input_box = pygame.Rect(100, 150, 140, 32)
+    input_box_username = pygame.Rect(100, 150, 140, 32)
+    input_box_password = pygame.Rect(400, 150, 140, 32)
     color_inactive = pygame.Color('lightskyblue3')
     color_active = pygame.Color('dodgerblue2')
     color = color_inactive
-    active = False
-    user_input = ''
+    active_username = False
+    active_password = False
+    user_id = ''
+    user_pass = ''
     done = False
 
     while not done:
@@ -22,34 +25,64 @@ def show_popup(screen):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if input_box.collidepoint(event.pos):
-                    active = not active
+                # Check username input box
+                if input_box_username.collidepoint(event.pos):
+                    active_username = True
+                    active_password = False
+                # Check password input box
+                elif input_box_password.collidepoint(event.pos):
+                    active_username = False
+                    active_password = True
                 else:
-                    active = False
-                color = color_active if active else color_inactive
+                    active_username = False
+                    active_password = False
+                color = color_active if active_username or active_password else color_inactive
             if event.type == pygame.KEYDOWN:
-                if active:
+                if active_username:
                     if event.key == pygame.K_RETURN:
-                        done = True
+                        active_username = False
+                        active_password = True
                     elif event.key == pygame.K_BACKSPACE:
-                        user_input = user_input[:-1]
+                        user_id = user_id[:-1]
                     else:
-                        user_input += event.unicode
+                        user_id += event.unicode
+                elif active_password:
+                    if event.key == pygame.K_RETURN:
+                        if user_id != '' and user_pass != '':
+                            done = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_pass = user_pass[:-1]
+                    else:
+                        user_pass += event.unicode
 
         screen.fill((30, 30, 30))
         
         font = pygame.font.Font(None, 24)
         text_surface = font.render("Enter your username:", True, (255, 255, 255))
         screen.blit(text_surface, (100, 100))
+
+        font = pygame.font.Font(None, 24)
+        text_surface = font.render("Enter your password:", True, (255, 255, 255))
+        screen.blit(text_surface, (400, 100))
+
         
-        txt_surface = pygame.font.Font(None, 32).render(user_input, True, color)
-        width = max(200, txt_surface.get_width()+10)
-        input_box.w = width
-        screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
-        pygame.draw.rect(screen, color, input_box, 2)
+        txt_surface_username = pygame.font.Font(None, 32).render(user_id, True, color)
+        width_username = max(200, txt_surface_username.get_width()+10)
+        input_box_username.w = width_username
+        screen.blit(txt_surface_username, (input_box_username.x+5, input_box_username.y+5))
+        pygame.draw.rect(screen, color, input_box_username, 2)
+
+        txt_surface_password = pygame.font.Font(None, 32).render("*" * len(user_pass), True, color)
+        width_password = max(200, txt_surface_password.get_width()+10)
+        input_box_password.w = width_password
+        screen.blit(txt_surface_password, (input_box_password.x+5, input_box_password.y+5))
+        pygame.draw.rect(screen, color, input_box_password, 2)
+        
         pygame.display.flip()
 
-    return user_input
+    return user_id, user_pass
+
+
 
 
 
@@ -178,7 +211,7 @@ while Running:
                 elif event.key == pygame.K_RETURN:
                     if selectedItem == 0:
                         # Vis popup-vinduet for å få brukernavnet
-
+                        show_popup(screen)
                         playGame()  # Starter spillet når "Start game" er valgt
                     elif selectedItem == 1:
                         in_options_menu = True
