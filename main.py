@@ -118,27 +118,37 @@ def show_popup(screen):
 
     return user_id, user_pass, login_selected
 
-def register_user(username, password):
-    # Sjekk om 'username' kan konverteres til heltall
-    try:
-        user_id = int(username)
-    except ValueError:
-        print("Brukernavn kan inneholde både numeriske og alfabetiske tegn.")
-        return
-    
+def register_user(user_id, password):
     connect = pymysql.connect(
         host='172.20.128.69',
         user='matheo',
         password='123Akademiet',
         database='bruker'
     )
+
     try:
         with connect.cursor() as cursor:
-            sql = "INSERT INTO loggin (id, password) VALUES (%s, %s)"
-            cursor.execute(sql, (user_id, password))
+            # Sjekk om brukernavnet allerede eksisterer
+            check_sql = "SELECT * FROM loggin WHERE id=%s"
+            cursor.execute(check_sql, (user_id,))
+            existing_user = cursor.fetchone()
+            
+            error_message = ''
+            if existing_user:
+                error_message = 'bruker eksisterer allerede'
+                if error_message:
+                    font = pygame.font.Font(None, 24)
+                    error_surface = font.render(error_message, True, (255, 0, 0))
+                    screen.blit(error_surface, (100, 300))
+            
+            # Legg til brukeren hvis den ikke allerede eksisterer
+            insert_sql = "INSERT INTO loggin (id, password) VALUES (%s, %s)"
+            cursor.execute(insert_sql, (user_id, password))
             connect.commit()
+            return True  # Returner True for å indikere vellykket registrering
     finally:
         connect.close()
+
 
 def login_user(username, password):
     connect = pymysql.connect(
@@ -169,7 +179,17 @@ def insert_score(username, score):
     )
 
     try:
-        pass
+        if username:
+            # Update the score for the existing user
+            cursor.execute("UPDATE score SET score = %s WHERE username = %s", (score, username))
+        else:
+            # Insert a new record for the user
+            cursor.execute("INSERT INTO users (username, score) VALUES (%s, %s)", (username, score))
+
+        with connect.cursor() as cursor:
+            sql = "INSERT INTO score (id, score) VALUES (%s, %s)"
+            cursor.execute(sql, (username, score))
+            connect.commit()
     finally:
         connect.close()
 
@@ -240,6 +260,8 @@ def playGame():
         if keys[pygame.K_d]:
             square_x += speed
         if keys[pygame.K_ESCAPE]:
+            username = 1234
+            insert_score(username, score)
             running = False
 
         # Sørger for at firkanten ikke går utenfor vinduet
@@ -269,6 +291,9 @@ def playGame():
 
         elif current_room == 'Rom4':
             pygame.draw.rect(win, BLUE, (100, 100, hidden_item_width, hidden_item_height))
+            if 75 <= square_x <= 125:
+                if 75 <= square_y <= 125:
+                    score += 1
 
         # Oppdaterer vinduet
         pygame.display.update()
