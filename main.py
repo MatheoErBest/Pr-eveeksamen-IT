@@ -159,6 +159,9 @@ screenX, screenY = 1080, 700
 screen = pygame.display.set_mode((screenX, screenY))
 pygame.display.set_caption('Super Duper Kul')
 
+# Vis popup-vinduet for å få brukernavnet
+show_popup(screen)
+
 # Funksjoner for hovedmenyen
 def drawText(text, font, color, x, y):
     text_surface = font.render(text, True, color)
@@ -209,9 +212,7 @@ while Running:
                 elif event.key == pygame.K_UP:
                     selectedItem = (selectedItem - 1) % len(menuItems)
                 elif event.key == pygame.K_RETURN:
-                    if selectedItem == 0:
-                        # Vis popup-vinduet for å få brukernavnet
-                        show_popup(screen)
+                    if selectedItem == 0:                        
                         playGame()  # Starter spillet når "Start game" er valgt
                     elif selectedItem == 1:
                         in_options_menu = True
