@@ -279,6 +279,8 @@ def playGame():
         text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 30))
         win.blit(text, text_rect)
 
+        
+
         # Sjekker om firkanten er i det riktige rommet
         if current_room == "Rom1":
             pass
