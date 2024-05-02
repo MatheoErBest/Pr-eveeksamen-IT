@@ -6,10 +6,12 @@ import sys
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
-# Funksjon for å vise popup-vinduet
+# Funksjon som legger til en popup for å logge inn
 def show_popup(screen):
     input_box_username = pygame.Rect(100, 150, 140, 32)
     input_box_password = pygame.Rect(400, 150, 140, 32)
+    login_button = pygame.Rect(100, 250, 120, 50)
+    register_button = pygame.Rect(400, 250, 120, 50)
     color_inactive = pygame.Color('lightskyblue3')
     color_active = pygame.Color('dodgerblue2')
     color = color_inactive
@@ -18,6 +20,8 @@ def show_popup(screen):
     user_id = ''
     user_pass = ''
     done = False
+    login_selected = True
+    color_inactive_button = pygame.Color('darkgreen')
 
     while not done:
         for event in pygame.event.get():
@@ -33,6 +37,12 @@ def show_popup(screen):
                 elif input_box_password.collidepoint(event.pos):
                     active_username = False
                     active_password = True
+                # Check login button
+                elif login_button.collidepoint(event.pos):
+                    login_selected = True
+                # Check register button
+                elif register_button.collidepoint(event.pos):
+                    login_selected = False
                 else:
                     active_username = False
                     active_password = False
@@ -65,7 +75,21 @@ def show_popup(screen):
         text_surface = font.render("Enter your password:", True, (255, 255, 255))
         screen.blit(text_surface, (400, 100))
 
-        
+        # Login knapp
+        pygame.draw.rect(screen, (0, 100, 0), login_button if login_selected else color_inactive_button)
+        font = pygame.font.Font(None, 24)
+        text_surface = font.render("Login", True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=login_button.center)
+        screen.blit(text_surface, text_rect)
+
+        # Registreing knapp
+        pygame.draw.rect(screen, (0, 100, 0), register_button if not login_selected else color_inactive_button)
+        font = pygame.font.Font(None, 24)
+        text_surface = font.render("Register", True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=register_button.center)
+        screen.blit(text_surface, text_rect)
+
+
         txt_surface_username = pygame.font.Font(None, 32).render(user_id, True, color)
         width_username = max(200, txt_surface_username.get_width()+10)
         input_box_username.w = width_username
@@ -80,14 +104,14 @@ def show_popup(screen):
         
         pygame.display.flip()
 
-    return user_id, user_pass
+    return user_id, user_pass, login_selected
 
+# Funksjon for å sette inn brukernavn og passord i databasen
+def insert_id(username, password):
+    pass
 
-
-
-
-# Funksjon for å sette inn brukernavn i databasen
-def insert_username(username, highscore):
+#Funksjon for å sette inn score og brukernavn i database
+def insert_score(username, score):
     pass
 
 # Display
@@ -105,9 +129,6 @@ def playGame():
 
     # Lager vinduet til programmet
     win = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-
-    # Farger
-    
 
     # Setter firkantens posisjon og størrelse
     square_x = 100
