@@ -22,6 +22,7 @@ def show_popup(screen):
     done = False
     login_selected = True
     color_inactive_button = pygame.Color('darkgreen')
+    error_message = ''
 
     while not done:
         for event in pygame.event.get():
@@ -29,24 +30,25 @@ def show_popup(screen):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Check username input box
                 if input_box_username.collidepoint(event.pos):
                     active_username = True
                     active_password = False
-                # Check password input box
                 elif input_box_password.collidepoint(event.pos):
                     active_username = False
                     active_password = True
-                # Check login button
                 elif login_button.collidepoint(event.pos):
-                    login_selected = True
-                # Check register button
+                    if user_id != '' and user_pass != '':
+                        if login_user(user_id, user_pass):
+                            done = True
+                        else:
+                            error_message = "User not found. Please register."
                 elif register_button.collidepoint(event.pos):
-                    login_selected = False
+                    register_user(user_id, user_pass)
                 else:
                     active_username = False
                     active_password = False
                 color = color_active if active_username or active_password else color_inactive
+
             if event.type == pygame.KEYDOWN:
                 if active_username:
                     if event.key == pygame.K_RETURN:
@@ -59,14 +61,17 @@ def show_popup(screen):
                 elif active_password:
                     if event.key == pygame.K_RETURN:
                         if user_id != '' and user_pass != '':
-                            done = True
+                            if login_user(user_id, user_pass):
+                                done = True
+                            else:
+                                error_message = "User not found. Please register."
                     elif event.key == pygame.K_BACKSPACE:
                         user_pass = user_pass[:-1]
                     else:
                         user_pass += event.unicode
 
         screen.fill((30, 30, 30))
-        
+
         font = pygame.font.Font(None, 24)
         text_surface = font.render("Enter your username:", True, (255, 255, 255))
         screen.blit(text_surface, (100, 100))
@@ -82,13 +87,12 @@ def show_popup(screen):
         text_rect = text_surface.get_rect(center=login_button.center)
         screen.blit(text_surface, text_rect)
 
-        # Registreing knapp
+        # Registreringsknapp
         pygame.draw.rect(screen, (0, 100, 0), register_button if not login_selected else color_inactive_button)
         font = pygame.font.Font(None, 24)
         text_surface = font.render("Register", True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=register_button.center)
         screen.blit(text_surface, text_rect)
-
 
         txt_surface_username = pygame.font.Font(None, 32).render(user_id, True, color)
         width_username = max(200, txt_surface_username.get_width()+10)
@@ -101,18 +105,71 @@ def show_popup(screen):
         input_box_password.w = width_password
         screen.blit(txt_surface_password, (input_box_password.x+5, input_box_password.y+5))
         pygame.draw.rect(screen, color, input_box_password, 2)
-        
+
+        # Feilmelding
+        if error_message:
+            font = pygame.font.Font(None, 24)
+            error_surface = font.render(error_message, True, (255, 0, 0))
+            screen.blit(error_surface, (100, 300))
+
         pygame.display.flip()
 
     return user_id, user_pass, login_selected
 
-# Funksjon for å sette inn brukernavn og passord i databasen
-def insert_id(username, password):
-    pass
+def register_user(username, password):
+    # Sjekk om 'username' kan konverteres til heltall
+    try:
+        user_id = int(username)
+    except ValueError:
+        print("Brukernavn kan inneholde både numeriske og alfabetiske tegn.")
+        return
+    
+    connect = pymysql.connect(
+        host='172.20.128.69',
+        user='matheo',
+        password='123Akademiet',
+        database='bruker'
+    )
+    try:
+        with connect.cursor() as cursor:
+            sql = "INSERT INTO loggin (id, password) VALUES (%s, %s)"
+            cursor.execute(sql, (user_id, password))
+            connect.commit()
+    finally:
+        connect.close()
 
-#Funksjon for å sette inn score og brukernavn i database
+def login_user(username, password):
+    connect = pymysql.connect(
+        host='172.20.128.69',
+        user='matheo',
+        password='123Akademiet',
+        database='bruker'
+    )
+    try:
+        with connect.cursor() as cursor:
+            sql = "SELECT * FROM loggin WHERE id=%s AND password=%s"
+            cursor.execute(sql, (username, password))
+            result = cursor.fetchone()
+            if result:
+                return True
+            else:
+                return False
+    finally:
+        connect.close()
+
+# Funksjon for å sette inn score og brukernavn i database
 def insert_score(username, score):
-    pass
+    connect = pymysql.connect(
+        host='172.20.128.69',
+        user='matheo',
+        password='123Akademiet',
+        database='spillinfo',
+    )
+
+    try:
+        pass
+    finally:
+        connect.close()
 
 # Display
 pygame.init()
