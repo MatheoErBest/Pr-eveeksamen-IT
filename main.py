@@ -1,10 +1,12 @@
 import pygame
 import pymysql
 import sys
+import random
 
 # Farger
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 # Funksjon som legger til en popup for å logge inn
 def show_popup(screen):
@@ -179,13 +181,14 @@ pygame.display.set_caption('Enter Username')
 
 # Funksjon for å starte spillet
 def playGame():
-
     # Definerer vindusstørrelsen
     WINDOW_WIDTH = 1080
     WINDOW_HEIGHT = 700
 
     # Lager vinduet til programmet
+    pygame.init()
     win = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption("Mitt spill")
 
     # Setter firkantens posisjon og størrelse
     square_x = 100
@@ -196,14 +199,36 @@ def playGame():
     # Bevegelseshastighet
     speed = 10
 
+    # Liste over rom
+    rooms = ["Rom1", "Rom2", "Rom3", "Rom4"]
+    current_room_index = 0
+
+    # Velger det første rommet
+    current_room = rooms[current_room_index]
+
+    # Score
+    score = 0
+
+    # Setter opp font for score
+    font = pygame.font.Font(None, 36)
+
+    # Størrelse på den skjulte gjenstanden
+    hidden_item_width = 50
+    hidden_item_height = 50
+
     # Setter opp hovedløkken til spillet
     running = True
     while running:
         # Hører etter hendelser
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.QUIT()
-        
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    # Bytt til neste rom når mellomromstasten trykkes
+                    current_room_index = (current_room_index + 1) % len(rooms)
+                    current_room = rooms[current_room_index]
+
         # Håndterer tastetrykk
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
@@ -226,6 +251,24 @@ def playGame():
 
         # Tegner firkanten
         pygame.draw.rect(win, RED, (square_x, square_y, square_width, square_height))
+
+        # Viser scoren øverst i midten av skjermen
+        text = font.render("Score: " + str(score), True, (0, 0, 0))
+        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 30))
+        win.blit(text, text_rect)
+
+        # Sjekker om firkanten er i det riktige rommet
+        if current_room == "Rom1":
+            pass
+        
+        elif current_room == 'Rom2':
+            pass
+
+        elif current_room == 'Rom3':
+            pass
+
+        elif current_room == 'Rom4':
+            pygame.draw.rect(win, BLUE, (100, 100, hidden_item_width, hidden_item_height))
 
         # Oppdaterer vinduet
         pygame.display.update()
