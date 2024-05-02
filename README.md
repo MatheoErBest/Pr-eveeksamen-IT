@@ -1,0 +1,2 @@
+# Oversikt
+I dette prosjektet har jeg lagd en app som har et simpelt spill med en meny og en innloggings side. Med innloggingen må man først registrere en bruker og så kan man logge inn. Passord og brukernavn blir lagret i en database som er kryptert fordi det er passord inni kolonnene. 
