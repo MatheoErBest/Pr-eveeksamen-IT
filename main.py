@@ -7,6 +7,8 @@ import random
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+Usikker = (128, 40, 0)
 
 # Funksjon som legger til en popup for å logge inn
 def show_popup(screen):
@@ -269,10 +271,9 @@ def playGame():
         square_y = max(0, min(square_y, WINDOW_HEIGHT - square_height))
 
         # Tegner bakgrunnen
-        win.fill(WHITE)
 
-        # Tegner firkanten
-        pygame.draw.rect(win, RED, (square_x, square_y, square_width, square_height))
+
+        
 
         # Viser scoren øverst i midten av skjermen
         text = font.render("Score: " + str(score), True, (0, 0, 0))
@@ -283,19 +284,23 @@ def playGame():
 
         # Sjekker om firkanten er i det riktige rommet
         if current_room == "Rom1":
-            pass
+            win.fill(WHITE)
         
         elif current_room == 'Rom2':
-            pass
+            win.fill(BLUE)
 
         elif current_room == 'Rom3':
-            pass
+            screen.fill(Usikker)
 
         elif current_room == 'Rom4':
+            screen.fill(WHITE)
             pygame.draw.rect(win, BLUE, (100, 100, hidden_item_width, hidden_item_height))
             if 75 <= square_x <= 125:
                 if 75 <= square_y <= 125:
                     score += 1
+
+        # Tegner firkanten
+        pygame.draw.rect(win, RED, (square_x, square_y, square_width, square_height))
 
         # Oppdaterer vinduet
         pygame.display.update()
