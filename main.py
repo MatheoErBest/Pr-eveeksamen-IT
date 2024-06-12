@@ -2,8 +2,7 @@ import pygame
 import pymysql
 import sys
 import random
-from argon2 import PasswordHasher
-ph = PasswordHasher()
+
 
 # Colors
 black = (127, 127, 127, 255)
@@ -19,8 +18,6 @@ violet = (246, 192, 246, 255)
 yellow = (255, 255, 127, 255)
 white = (255, 255, 255, 255)
 
-def hash_password(user_passord):
-    return ph.hash(user_passord)
 
 # Function to show login/register popup
 def show_popup(screen):
@@ -147,6 +144,7 @@ def register_user(user_brukernavn, passord, screen):
             check_sql = "SELECT * FROM bruker WHERE brukernavn=%s"
             cursor.execute(check_sql, (user_brukernavn,))
             existing_user = cursor.fetchone()
+            print('hei')
             
             if existing_user:
                 error_message = 'User already exists'
@@ -165,8 +163,9 @@ def register_user(user_brukernavn, passord, screen):
     finally:
         connect.close()
 
+
 def login_user(username, password):
-    password = hash_password(password)
+
     connect = pymysql.connect(
         host='172.20.128.56',
         user='matheo',
@@ -208,26 +207,51 @@ def insert_score(username, score):
         connect.close()
 
 #Classes
+class Vertical_Teleporter:
+    def __init__(self, name, x, y):
+        self.name = name
+        self.color = cyan
+        self.x = x
+        self.y = y
+
+    def draw(self, win):
+        pygame.draw.rect(win, self.color, (self.x, self.y, 50, 200))
+        
+
+class Horizontal_Teleporter:
+    def __init__(self, name, x, y):
+        self.name = name
+        self.color = cyan
+        self.x = x
+        self.y = y
+
+    def draw(self, win):
+        pygame.draw.rect(win, self.color, (self.x, self.y, 200, 50))
+
 class Room:
-    def __init__(self, name, color, hidden_item = None):
+    def __init__(self, name, color, hidden_item=None, hteleporters=None, vteleporters=None):
         self.name = name
         self.color = color
         self.hidden_item = hidden_item
+        self.hteleporters = hteleporters if hteleporters else []
+        self.vteleporters = vteleporters if vteleporters else []
 
     def draw(self, win, square_x, square_y, hidden_item_size, score):
         win.fill(self.color)
         if self.hidden_item:
             pygame.draw.rect(win, self.hidden_item['color'], (self.hidden_item['x'], self.hidden_item['y'], hidden_item_size, hidden_item_size))
             if self.hidden_item['x'] <= square_x <= self.hidden_item['x'] + hidden_item_size and \
-               self.hidden_item['y'] <= square_y <= self.hidden_item['y'] + hidden_item_size:
+            self.hidden_item['y'] <= square_y <= self.hidden_item['y'] + hidden_item_size:
                 score += 1
-        return score
-class Teleporter:
-    def __init__(self, name, color):
-        pass
 
-class Player:
-    pass
+        # Draw teleporters
+        for hteleporter in self.hteleporters:
+            pygame.draw.rect(win, hteleporter.color, (hteleporter.x, hteleporter.y, 200, 50)) 
+            
+        for vteleporter in self.vteleporters:
+            pygame.draw.rect(win, vteleporter.color, (vteleporter.x, vteleporter.y, 50, 200))
+
+        return score
 
 # Display
 pygame.init()
@@ -252,16 +276,27 @@ def play_game(username):
     square_height = 20
 
     # Movement speed
-    speed = 10
+    speed = 5
 
-    # List of rooms
-    rooms = [
-        Room('Room1', red),
-        Room('Room2', orange, hidden_item={'x': 100, 'y': 100, 'color': blue}),
-        Room('Room3', yellow),
-        Room('Room4', green, hidden_item={'x': 100, 'y': 100, 'color': blue}),
-        Room('Room5', blue),
+    #Class Lists
+    Ver_Teleportereleporters = [
+        Vertical_Teleporter('verticalteleporter', y= WINDOW_HEIGHT // 2 - 50, x= 50),
+        Vertical_Teleporter('verticalteleporter', y= WINDOW_HEIGHT // 2 - 50, x= 1000),
+
     ]
+
+    Hor_Teleporter = [
+        Horizontal_Teleporter('horizontal1', y= 50, x= WINDOW_WIDTH // 2 - 100),
+    ]
+
+    rooms = [
+        Room('Room1', red, hteleporters=Hor_Teleporter, vteleporters=Ver_Teleportereleporters),
+        Room('Room2', orange, hidden_item={'x': 100, 'y': 100, 'color': blue}, hteleporters=Hor_Teleporter, vteleporters=Ver_Teleportereleporters),
+        Room('Room3', yellow, hteleporters=Hor_Teleporter, vteleporters=Ver_Teleportereleporters),
+        Room('Room4', green, hidden_item={'x': 100, 'y': 100, 'color': blue}, hteleporters=Hor_Teleporter, vteleporters=Ver_Teleportereleporters),
+        Room('Room5', blue, hteleporters=Hor_Teleporter, vteleporters=Ver_Teleportereleporters),
+    ]
+
 
     current_room_index = 0
     current_room = rooms[current_room_index]
