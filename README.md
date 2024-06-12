@@ -14,7 +14,7 @@ Gjennom prosjektet her har jeg støtt på mange problemer, mest når det kom til
 
 # Hvordan bruke appen
 1. Logge inn:
-For å logge inn mp du starte med  skrive inn et brukernavn og passord, så trykker du registrer så logg in.
+For å logge inn må du starte med  skrive inn et brukernavn og passord, så trykker du registrer så logg in.
 
 2. Starte et spill
 Å starte et spill er ganske lett, det er bare å navigere med piltastene dine til 'Start Game' så trykker du enter.
