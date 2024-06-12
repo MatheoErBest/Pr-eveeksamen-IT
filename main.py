@@ -2,6 +2,8 @@ import pygame
 import pymysql
 import sys
 import random
+from argon2 import PasswordHasher
+ph = PasswordHasher()
 
 # Colors
 black = (127, 127, 127, 255)
@@ -17,6 +19,8 @@ violet = (246, 192, 246, 255)
 yellow = (255, 255, 127, 255)
 white = (255, 255, 255, 255)
 
+def hash_password(user_passord):
+    return ph.hash(user_passord)
 
 # Function to show login/register popup
 def show_popup(screen):
@@ -31,6 +35,7 @@ def show_popup(screen):
     active_password = False
     user_brukernavn = ''
     user_passord = ''
+    hashed_passord = ''
     done = False
     login_selected = True
     color_inactive_button = pygame.Color('darkgreen')
@@ -161,6 +166,7 @@ def register_user(user_brukernavn, passord, screen):
         connect.close()
 
 def login_user(username, password):
+    password = hash_password(password)
     connect = pymysql.connect(
         host='172.20.128.56',
         user='matheo',
@@ -216,6 +222,9 @@ class Room:
                self.hidden_item['y'] <= square_y <= self.hidden_item['y'] + hidden_item_size:
                 score += 1
         return score
+class Teleporter:
+    def __init__(self, name, color):
+        pass
 
 class Player:
     pass
