@@ -4,11 +4,19 @@ import sys
 import random
 
 # Colors
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-Usikker = (128, 40, 0)
+black = (127, 127, 127, 255)
+blue = (127, 127, 255, 255)
+cyan = (127, 255, 255, 255)
+gold = (255, 235, 127, 255)
+gray = (222, 222, 222, 255)
+green = (127, 255, 127, 255)
+orange = (255, 210, 127, 255)
+purple = (207, 143, 247, 255)
+red = (255, 127, 127, 255)
+violet = (246, 192, 246, 255)
+yellow = (255, 255, 127, 255)
+white = (255, 255, 255, 255)
+
 
 # Function to show login/register popup
 def show_popup(screen):
@@ -193,6 +201,25 @@ def insert_score(username, score):
     finally:
         connect.close()
 
+#Classes
+class Room:
+    def __init__(self, name, color, hidden_item = None):
+        self.name = name
+        self.color = color
+        self.hidden_item = hidden_item
+
+    def draw(self, win, square_x, square_y, hidden_item_size, score):
+        win.fill(self.color)
+        if self.hidden_item:
+            pygame.draw.rect(win, self.hidden_item['color'], (self.hidden_item['x'], self.hidden_item['y'], hidden_item_size, hidden_item_size))
+            if self.hidden_item['x'] <= square_x <= self.hidden_item['x'] + hidden_item_size and \
+               self.hidden_item['y'] <= square_y <= self.hidden_item['y'] + hidden_item_size:
+                score += 1
+        return score
+
+class Player:
+    pass
+
 # Display
 pygame.init()
 screen = pygame.display.set_mode((300, 300))
@@ -219,11 +246,18 @@ def play_game(username):
     speed = 10
 
     # List of rooms
-    rooms = ["Room1", "Room2", "Room3", "Room4"]
-    current_room_index = 0
+    rooms = [
+        Room('Room1', red),
+        Room('Room2', orange, hidden_item={'x': 100, 'y': 100, 'color': blue}),
+        Room('Room3', yellow),
+        Room('Room4', green, hidden_item={'x': 100, 'y': 100, 'color': blue}),
+        Room('Room5', blue),
+    ]
 
-    # Select the first room
+    current_room_index = 0
     current_room = rooms[current_room_index]
+
+    hidden_item_size = 50
 
     # Score
     score = 0
@@ -231,17 +265,13 @@ def play_game(username):
     # Set up font for score
     font = pygame.font.Font(None, 36)
 
-    # Size of the hidden item
-    hidden_item_width = 50
-    hidden_item_height = 50
-
     # Main game loop
-    running = True
-    while running:
+    game = True
+    while game:
         # Listen for events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                game = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     # Switch to next room when space is pressed
@@ -259,31 +289,19 @@ def play_game(username):
         if keys[pygame.K_d]:
             square_x += speed
         if keys[pygame.K_ESCAPE]:
-            insert_score(username, score)
-            running = False
+            game = False
+            
 
         # Prevent the square from going out of the window
         square_x = max(0, min(square_x, WINDOW_WIDTH - square_width))
         square_y = max(0, min(square_y, WINDOW_HEIGHT - square_height))
 
-        # Check if the square is in the right room
-        if current_room == "Room1":
-            win.fill(WHITE)
-        
-        elif current_room == 'Room2':
-            win.fill(BLUE)
-
-        elif current_room == 'Room3':
-            win.fill(Usikker)
-
-        elif current_room == 'Room4':
-            win.fill(WHITE)
-            pygame.draw.rect(win, BLUE, (100, 100, hidden_item_width, hidden_item_height))
-            if 75 <= square_x <= 125 and 75 <= square_y <= 125:
-                score += 1
+        # Draw the current room and update the score
+        score = current_room.draw(win, square_x, square_y, hidden_item_size, score)
 
         # Draw the square
-        pygame.draw.rect(win, RED, (square_x, square_y, square_width, square_height))
+        pygame.draw.rect(win, black, (square_x, square_y, square_width, square_height))
+    
 
         # Display the score at the top center of the screen
         text = font.render("Score: " + str(score), True, (0, 0, 0))
